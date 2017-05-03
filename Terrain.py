@@ -29,7 +29,7 @@ class Terrain:
 
     def __init__(self, context, startX, startY, tileWidth, tileHeight, length):
         self.context = context
-        self.t = []
+        self.tiles = []
         self.x = startX + tileWidth/2
         self.y = startY + tileHeight/2
         self.tileWidth = tileWidth
@@ -38,7 +38,7 @@ class Terrain:
             self.add()
 
     def add(self):
-        self.t.append(Terrain.Tile(self.context, self.x, self.y, self.tileWidth/2, self.tileHeight/2))
+        self.tiles.append(Terrain.Tile(self.context, self.x, self.y, self.tileWidth/2, self.tileHeight/2))
         self.x += self.tileWidth
         self.y += self.tileHeight
 
@@ -46,5 +46,5 @@ class Terrain:
         pass
 
     def draw(self):
-        for tile in self.t:
+        for tile in self.tiles:
             tile.draw()
