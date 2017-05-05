@@ -5,16 +5,19 @@ import pygame
 
 class Terrain:
     class Tile:
-        def __init__(self, context, x, y, w, h):
+        def __init__(self, context, x, y, x2, y2):
             self.context = context
             self.x = x
             self.y = y
-            self.w = w
-            self.h = h
+            o = y2 - y
+            a = x2 - x
+            self.w = math.sqrt(o**2 + a**2)
+            self.h = 0.2
+            self.rotation = math.atan2(o, a)
             self.body = context.world.CreateStaticBody(
-                position=(x, y),
-                shapes=Box2D.b2.polygonShape(box=(w, h)),
-                angle=math.pi
+                position=(self.x+a/2, self.y+o/2),
+                shapes=Box2D.b2.polygonShape(box=(self.w/2, self.h/2)),
+                angle=self.rotation
             )
 
         def update(self):
@@ -27,20 +30,22 @@ class Terrain:
                 vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
                 pygame.draw.polygon(self.context.screen, (127, 127, 127, 255), vertices)
 
-    def __init__(self, context, startX, startY, tileWidth, tileHeight, length):
+    def __init__(self, context, startX, startY, stepSize, length, composer):
         self.context = context
         self.tiles = []
-        self.x = startX + tileWidth/2
-        self.y = startY + tileHeight/2
-        self.tileWidth = tileWidth
-        self.tileHeight = tileHeight
+        self.x = startX
+        self.y = startY
+        self.composer = composer
+        self.stepSize = stepSize
         for i in range(length):
-            self.add()
+           self.add()
 
     def add(self):
-        self.tiles.append(Terrain.Tile(self.context, self.x, self.y, self.tileWidth/2, self.tileHeight/2))
-        self.x += self.tileWidth
-        self.y += self.tileHeight
+        newX = self.x + self.stepSize
+        newY = self.y + self.composer.compute(newX)
+        self.tiles.append(Terrain.Tile(self.context, self.x, self.y, newX, newY))
+        self.x = newX
+        self.y = newY
 
     def update(self):
         pass

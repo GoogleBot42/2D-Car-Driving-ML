@@ -1,6 +1,8 @@
 import pygame
 from Terrain import Terrain
 from Car import Car
+import TerrainGenerator
+import math
 
 
 class Context:
@@ -12,16 +14,17 @@ class Context:
         self.PPM = 20.0  # pixels per meter
         self.TARGET_FPS = 60
         self.TIME_STEP = 1.0 / self.TARGET_FPS
-        self.SCREEN_WIDTH = 800
-        self.SCREEN_HEIGHT = 600
+        self.SCREEN_WIDTH = 1200
+        self.SCREEN_HEIGHT = 800
+        self.clock = pygame.time.Clock()
 
         # core objects
         self.world = physicsWorld
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
         # world objects
-        self.terrain = Terrain(self, 0, 0, 2, 0.2, 3)
-        self.car = Car()
+        self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT/self.PPM/2, 2, 25, TerrainGenerator.Composer(1, math.pi))
+        self.car = Car(self, 0, 0)
 
     def update(self):
         self.terrain.update()
@@ -33,4 +36,4 @@ class Context:
         self.terrain.draw()
         self.car.draw()
         pygame.display.flip()
-        pygame.time.Clock()
+        self.clock.tick(self.TARGET_FPS)
