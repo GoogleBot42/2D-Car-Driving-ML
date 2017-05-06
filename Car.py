@@ -8,7 +8,7 @@ class Car:
         self.context = context
         self.x = x
         self.y = y
-        self.speed = 1000
+        self.speed = 50
 
         car, wheels, springs = create_car(context.world, offset=(
             25.0, 25.0), wheel_radius=0.4, wheel_separation=2.0, scale=(1.5, 1.5), density=2.0)
