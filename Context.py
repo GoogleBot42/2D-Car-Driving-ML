@@ -31,8 +31,11 @@ class Context:
         # world objects
         self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT/self.PPM/2, 2, 25, TerrainGenerator.Composer(1, math.pi))
         self.car = Car(self, 0, 0)
+        
+        self.keys = pygame.key.get_pressed()
 
     def update(self):
+        self.keys = pygame.key.get_pressed()
         self.terrain.update()
         self.car.update()
         self.world.Step(self.TIME_STEP, 10, 10)
