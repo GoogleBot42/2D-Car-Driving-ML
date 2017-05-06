@@ -8,7 +8,7 @@ class Car:
         self.context = context
         self.x = x
         self.y = y
-        self.speed = 1
+        self.speed = 1000
 
         car, wheels, springs = create_car(context.world, offset=(
             25.0, 25.0), wheel_radius=0.4, wheel_separation=2.0, scale=(1.5, 1.5), density=2.0)
@@ -18,9 +18,11 @@ class Car:
 
     def update(self):
         if self.context.keys[pygame.K_RIGHT]:
-            self.springs[0].motorSpeed = self.speed
-        if self.context.keys[pygame.K_LEFT]:
             self.springs[0].motorSpeed = -self.speed
+        elif self.context.keys[pygame.K_LEFT]:
+            self.springs[0].motorSpeed = self.speed
+        else:
+            self.springs[0].motorSpeed = 0
 
     def draw(self):
         for wheel in self.wheels:
@@ -49,7 +51,7 @@ class Car:
 
 def create_car(world, offset, wheel_radius, wheel_separation, density=1.0,
                wheel_friction=0.9, scale=(1.0, 1.0), chassis_vertices=None,
-               wheel_axis=(0.0, 1.0), wheel_torques=[20.0, 10.0],
+               wheel_axis=(0.0, 1.0), wheel_torques=[125.0, 0.0],
                wheel_drives=[True, False], hz=4.0, zeta=0.7, **kwargs):
     """
     """

@@ -16,10 +16,9 @@ class Terrain:
             self.rotation = math.atan2(o, a)
             self.body = context.world.CreateStaticBody(
                 position=(self.x+a/2, self.y+o/2),
-                # shapes=Box2D.b2.polygonShape(box=(self.w/2, self.h/2)),
                 angle=self.rotation,
             )
-            self.body.CreatePolygonFixture(box=(self.w/2, self.h/2), friction=0.3, density=2.0)
+            self.body.CreatePolygonFixture(box=(self.w/2, self.h/2), friction=0.9, density=2.0)
 
         def update(self):
             pass
@@ -29,8 +28,6 @@ class Terrain:
                 shape = fixture.shape
                 vertices = [(self.body.transform * v) * self.context.PPM for v in shape.vertices]
                 vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
-                if len(vertices) < 3:
-                    continue
                 pygame.draw.polygon(self.context.screen, (127, 127, 127, 255), vertices)
 
     def __init__(self, context, startX, startY, stepSize, length, composer):
