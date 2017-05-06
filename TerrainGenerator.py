@@ -8,8 +8,9 @@ class Composer:
         self.offset = 0
 
     def compute(self, x):
-        return self.amplitude * math.sin(self.offset + x / self.period)
-
+        s1 = self.amplitude * math.sin(self.offset + x * x / self.period)
+        s2 = self.amplitude / 8 * math.sin(self.offset + math.pi + x / self.period)
+        return s1 + s2
 
 class Decomposer:
     def __init__(self):

@@ -28,6 +28,7 @@ class Terrain:
                 shape = fixture.shape
                 vertices = [(self.body.transform * v) * self.context.PPM for v in shape.vertices]
                 vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
+                vertices = [(v[0] - self.context.offset[0], v[1] - self.context.offset[1]) for v in vertices]
                 pygame.draw.polygon(self.context.screen, (127, 127, 127, 255), vertices)
 
     def __init__(self, context, startX, startY, stepSize, length, composer):

@@ -4,25 +4,40 @@ import pygame
 
 
 class Car:
-    def __init__(self, context, x, y):
+    def __init__(self, context, x, y, controller):
         self.context = context
         self.x = x
         self.y = y
-        self.speed = 50
+        self.controller = controller
 
         car, wheels, springs = create_car(context.world, offset=(
-            25.0, 25.0), wheel_radius=0.4, wheel_separation=2.0, scale=(1.5, 1.5), density=2.0)
+            x, y), wheel_radius=0.5, wheel_separation=2.0, scale=(1.5, 1.5), density=2.0)
         self.car = car
         self.wheels = wheels
         self.springs = springs
 
     def update(self):
-        if self.context.keys[pygame.K_RIGHT]:
-            self.springs[0].motorSpeed = -self.speed
-        elif self.context.keys[pygame.K_LEFT]:
-            self.springs[0].motorSpeed = self.speed
-        else:
+        self.context.offset[0] = self.car.position[0] * self.context.PPM - self.context.SCREEN_WIDTH/2
+        
+        action = self.controller.getNextAction(self.car.position)
+        
+        if abs(action) < 5:
             self.springs[0].motorSpeed = 0
+            self.springs[1].motorSpeed = 0
+        else:
+            self.springs[0].motorSpeed = -action
+            self.springs[1].motorSpeed = -action
+            
+        
+        # if self.context.keys[pygame.K_RIGHT]:
+        #     self.springs[0].motorSpeed = -self.speed
+        #     self.springs[1].motorSpeed = -self.speed
+        # elif self.context.keys[pygame.K_LEFT]:
+        #      self.springs[0].motorSpeed = self.speed
+        #     self.springs[1].motorSpeed = self.speed
+        # else:
+        #     self.springs[0].motorSpeed = 0
+        #     self.springs[1].motorSpeed = 0
 
     def draw(self):
         for wheel in self.wheels:
@@ -33,6 +48,7 @@ class Car:
             pos = (shape.pos[0] + worldPos[0], shape.pos[1] + worldPos[1])
             pos = (pos[0] * self.context.PPM, pos[1] * self.context.PPM)
             pos = (pos[0], self.context.SCREEN_HEIGHT - pos[1])
+            pos = (pos[0] - self.context.offset[0], pos[1] - self.context.offset[1])
             pos = (math.floor(pos[0]), math.floor(pos[1]))
             radius = math.floor(shape.radius * self.context.PPM)
             pygame.draw.circle(self.context.screen, (127, 127, 255, 255), pos, radius)
@@ -45,14 +61,15 @@ class Car:
             shape = fixture.shape
             vertices = [(self.car.transform * v) * self.context.PPM for v in shape.vertices]
             vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
+            vertices = [(v[0] - self.context.offset[0], v[1] - self.context.offset[1]) for v in vertices]
             pygame.draw.polygon(self.context.screen, (127, 255, 127, 255), vertices)
                 
 
 
 def create_car(world, offset, wheel_radius, wheel_separation, density=1.0,
                wheel_friction=0.9, scale=(1.0, 1.0), chassis_vertices=None,
-               wheel_axis=(0.0, 1.0), wheel_torques=[125.0, 0.0],
-               wheel_drives=[True, False], hz=4.0, zeta=0.7, **kwargs):
+               wheel_axis=(0.0, 1.0), wheel_torques=[150.0, 150.0],
+               wheel_drives=[True, True], hz=4.0, zeta=0.7, **kwargs):
     """
     """
     x_offset, y_offset = offset

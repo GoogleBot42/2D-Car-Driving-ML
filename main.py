@@ -1,13 +1,9 @@
 import pygame
-import Box2D
 from Context import Context
 
 pygame.display.set_caption('Reinforcement Learning 2D Driving Car')
 
-# Create the world
-world = Box2D.b2.world(gravity=(0, -9.81), doSleep=True)
-
-context = Context(world)
+context = Context()
 
 done = False
 while not done:

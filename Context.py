@@ -3,11 +3,14 @@ from Terrain import Terrain
 from Car import Car
 import TerrainGenerator
 import math
+import Box2D
+from PlayerController import PlayerController
+from DumbController import DumbController
 
 
 class Context:
 
-    def __init__(self, physicsWorld):
+    def __init__(self):
         pygame.init()
 
         # constants
@@ -19,18 +22,18 @@ class Context:
         
         self.screenSize = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.zoom = 1.0
-        self.offset = (0.0, 0.0)
+        self.offset = [0, 0]
         self.viewCenter = (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2)
         
         self.clock = pygame.time.Clock()
 
         # core objects
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-        self.world = physicsWorld
+        self.world = Box2D.b2.world(gravity=(0, -9.81), doSleep=True)
 
         # world objects
-        self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT/self.PPM/2, 2, 25, TerrainGenerator.Composer(1, math.pi))
-        self.car = Car(self, 0, 0)
+        self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT/self.PPM/3, 1, 200, TerrainGenerator.Composer(0.9, math.pi))
+        self.car = Car(self, 25, 20, PlayerController(self))
         
         self.keys = pygame.key.get_pressed()
 
