@@ -21,7 +21,7 @@ class Car:
         
         action = self.controller.getNextAction(self.car.position)
         
-        if abs(action) < 5:
+        if abs(action) < 1:
             self.springs[0].motorSpeed = 0
             self.springs[1].motorSpeed = 0
         else:

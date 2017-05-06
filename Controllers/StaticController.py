@@ -1,13 +1,15 @@
-# does no learning.  runs in only one way
+import pygame
+from functools import reduce
 
+
+# does no learning.  runs in only one way
+# hand written
 class StaticController:
     def __init__(self, context):
         self.context = context
 
-    def getNextAction(self, carX):
-        if self.context.keys[pygame.K_RIGHT]:
-            return 50
-        elif self.context.keys[pygame.K_LEFT]:
-            return -50
-        else:
-            return 0
+    def getNextAction(self, carPos):
+        tiles = self.context.terrain.getTilesAfter(carPos[0], 10)
+        s = 0.0
+        for t in tiles: s += t.y - carPos[1] + 3
+        return max(1.5,s)

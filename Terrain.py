@@ -47,6 +47,11 @@ class Terrain:
         self.tiles.append(Terrain.Tile(self.context, self.x, self.y, newX, newY))
         self.x = newX
         self.y = newY
+    
+    def getTilesAfter(self, x, length):
+        index = x // self.stepSize
+        index = int(index)
+        return self.tiles[index:index+length]
 
     def update(self):
         pass

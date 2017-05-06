@@ -36,7 +36,6 @@ class Context:
         # world objects
         self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT/self.PPM/3, 1, 200, TerrainGenerator.Composer(0.9, math.pi))
         
-        
         controllers = [PlayerController(self), DumbController(), StaticController(self)]
         self.carController = controllers[int(sys.argv[1])]
         self.car = Car(self, 25, 20, self.carController)

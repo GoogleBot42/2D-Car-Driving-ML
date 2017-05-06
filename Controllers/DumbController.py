@@ -1,3 +1,3 @@
 class DumbController:
-    def getNextAction(self, carX):
+    def getNextAction(self, carPos):
         return 5
