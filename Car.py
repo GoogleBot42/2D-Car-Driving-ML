@@ -1,5 +1,6 @@
 import Box2D.b2
 import math
+import pygame
 
 
 class Car:
@@ -9,17 +10,34 @@ class Car:
         self.y = y
 
         car, wheels, springs = create_car(context.world, offset=(
-            0.0, 1.0), wheel_radius=0.4, wheel_separation=2.0, scale=(1, 1))
+            25.0, 25.0), wheel_radius=0.4, wheel_separation=2.0, scale=(1, 1))
         self.car = car
         self.wheels = wheels
         self.springs = springs
+        
+        print(self.wheels[0])
 
 
     def update(self):
-        pass
+        print("test")
 
     def draw(self):
-        pass
+        for wheel in self.wheels:
+            worldPos = wheel.worldCenter
+            for fixture in wheel.fixtures:
+                shape = fixture.shape
+                pos = (shape.pos[0] + worldPos[0], shape.pos[1] + worldPos[1])
+                pos = (pos[0] * self.context.PPM, pos[1] * self.context.PPM)
+                pos = (pos[0], self.context.SCREEN_HEIGHT - pos[1])
+                pos = (math.floor(pos[0]), math.floor(pos[1]))
+                radius = math.floor(shape.radius * self.context.PPM)
+                pygame.draw.circle(self.context.screen, (127, 127, 255, 255), pos, radius)
+        for fixture in self.car.fixtures:
+            shape = fixture.shape
+            vertices = [(self.car.transform * v) * self.context.PPM for v in shape.vertices]
+            vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
+            pygame.draw.polygon(self.context.screen, (127, 255, 127, 255), vertices)
+                
 
 
 def create_car(world, offset, wheel_radius, wheel_separation, density=1.0,
