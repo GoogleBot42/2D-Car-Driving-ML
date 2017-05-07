@@ -12,11 +12,11 @@ class LearningController(Controller):
         self.finalEpsilon = 0.01
         self.nTrials = 1000
         self.epsilonDecay = np.exp(np.log(self.finalEpsilon)/self.nTrials)
-        self.nSCGIterations = 30
+        self.nSCGIterations = 100
         self.gamma = 0.999
         
         # neural network
-        self.nh = [8, 8]
+        self.nh = [30, 30, 30]
         self.size = 15
         self.qnet = nn.NeuralNetwork([self.size] + self.nh + [1])  # [4, 5, 5, 1]
 
@@ -47,7 +47,8 @@ class LearningController(Controller):
 
     def decideNextAction(self, state):
         if np.random.rand(1) < self.epsilon:
-            actioni = np.random.randint(self.validActions.shape[0])
+            # actioni = np.random.randint(self.validActions.shape[0])
+            actioni = np.random.choice(np.array([0, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5]))
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
             qs = self.qnet.use(inputs)
