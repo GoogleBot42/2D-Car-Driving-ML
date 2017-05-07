@@ -10,7 +10,7 @@ class LearningController(Controller):
         # constants
         self.epsilon = 1
         self.finalEpsilon = 0.01
-        self.nTrials = 1000
+        self.nTrials = 100
         self.epsilonDecay = np.exp(np.log(self.finalEpsilon)/self.nTrials)
         self.nSCGIterations = 100
         self.gamma = 0.999
