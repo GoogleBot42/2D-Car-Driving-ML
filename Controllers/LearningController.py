@@ -55,7 +55,6 @@ class LearningController(Controller):
             if inputs.shape == (6,5):
                 actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
             else:
-                print(inputs.shape)
                 qs = self.qnet.use(inputs)
                 actioni = np.argmax(qs)
         return self.validActions[actioni]
