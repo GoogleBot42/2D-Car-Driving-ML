@@ -1,7 +1,8 @@
 import pygame
+from Controllers.Controller import Controller
 
 
-class PlayerController:
+class PlayerController(Controller):
     def __init__(self, context):
         self.context = context
 

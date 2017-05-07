@@ -15,13 +15,11 @@ class Car:
         self.car = car
         self.wheels = wheels
         self.springs = springs
-        
-        print(car)
 
     def update(self):
         self.context.offset[0] = self.car.position[0] * self.context.PPM - self.context.SCREEN_WIDTH/2
-        #self.context.offset[1] = self.car.position[1] * self.context.PPM
-        #print(self.context.offset[0], self.context.offset[1], self.car.position)
+        # self.context.offset[1] = self.car.position[1] * self.context.PPM
+        # print(self.context.offset[0], self.context.offset[1], self.car.position)
         
         action = self.controller.getNextAction(self.car.position)
         
@@ -61,9 +59,6 @@ class Car:
         self.context.world.DestroyBody(self.car)
         for wheel in self.wheels:
             self.context.world.DestroyBody(wheel)
-        # for spring in self.springs:
-        #     self.context.world.DestroyBody(spring)
-                
 
 
 def create_car(world, offset, wheel_radius, wheel_separation, density=1.0,

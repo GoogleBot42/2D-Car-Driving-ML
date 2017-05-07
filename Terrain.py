@@ -59,3 +59,7 @@ class Terrain:
     def draw(self):
         for tile in self.tiles:
             tile.draw()
+
+    def destroy(self):
+        for tile in self.tiles:
+            self.context.world.DestroyBody(tile.body)

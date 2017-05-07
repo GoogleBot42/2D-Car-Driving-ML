@@ -1,10 +1,9 @@
-import pygame
-from functools import reduce
+from Controllers.Controller import Controller
 
 
 # does no learning.  runs in only one way
 # hand written
-class StaticController:
+class StaticController(Controller):
     def __init__(self, context):
         self.context = context
 
