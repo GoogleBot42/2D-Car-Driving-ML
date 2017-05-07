@@ -18,7 +18,8 @@ class Car:
 
     def update(self):
         self.context.offset[0] = self.car.position[0] * self.context.PPM - self.context.SCREEN_WIDTH/2
-        # self.context.offset[1] = self.car.position[1] * self.context.PPM
+        self.context.offset[1] = self.car.position[1] * self.context.PPM - self.context.SCREEN_HEIGHT/2
+        self.context.offset[1] *= -1
         # print(self.context.offset[0], self.context.offset[1], self.car.position)
         
         action = self.controller.getNextAction(self.car.position)

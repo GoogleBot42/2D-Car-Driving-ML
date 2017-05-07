@@ -8,7 +8,7 @@ class LearningController(Controller):
         self.context = context
         
         # constants
-        self.epsilon = 0.1 # 1
+        self.epsilon = 1
         self.finalEpsilon = 0.01
         self.nTrials = 10
         self.epsilonDecay = np.exp(np.log(self.finalEpsilon)/self.nTrials)
@@ -51,6 +51,7 @@ class LearningController(Controller):
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
             print(inputs.shape)
+            print(inputs)
             qs = self.qnet.use(inputs)
             actioni = np.argmax(qs)
         return self.validActions[actioni]
@@ -58,6 +59,7 @@ class LearningController(Controller):
     def genState(self, carPos):
         car = self.context.car.car
         tiles = self.context.terrain.getTilesAfter(carPos[0], 10)
+        tiles = [t.y - carPos[0] + 3 for t in tiles]
         return np.array([car.angle, car.angularVelocity, car.linearVelocity[0], car.linearVelocity[1]] + tiles)
 
     def learn(self):
