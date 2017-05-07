@@ -2,10 +2,10 @@ import math
 
 
 class Composer:
-    def __init__(self, amplitude, period):
+    def __init__(self, amplitude, period, offset=0):
         self.amplitude = amplitude
         self.period = period
-        self.offset = 0
+        self.offset = offset
 
     def compute(self, x):
         s1 = self.amplitude * math.sin(self.offset + x * x / self.period)

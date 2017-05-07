@@ -15,9 +15,13 @@ class Car:
         self.car = car
         self.wheels = wheels
         self.springs = springs
+        
+        print(car)
 
     def update(self):
         self.context.offset[0] = self.car.position[0] * self.context.PPM - self.context.SCREEN_WIDTH/2
+        #self.context.offset[1] = self.car.position[1] * self.context.PPM
+        #print(self.context.offset[0], self.context.offset[1], self.car.position)
         
         action = self.controller.getNextAction(self.car.position)
         
@@ -27,17 +31,6 @@ class Car:
         else:
             self.springs[0].motorSpeed = -action
             self.springs[1].motorSpeed = -action
-            
-        
-        # if self.context.keys[pygame.K_RIGHT]:
-        #     self.springs[0].motorSpeed = -self.speed
-        #     self.springs[1].motorSpeed = -self.speed
-        # elif self.context.keys[pygame.K_LEFT]:
-        #      self.springs[0].motorSpeed = self.speed
-        #     self.springs[1].motorSpeed = self.speed
-        # else:
-        #     self.springs[0].motorSpeed = 0
-        #     self.springs[1].motorSpeed = 0
 
     def draw(self):
         for wheel in self.wheels:
@@ -63,6 +56,13 @@ class Car:
             vertices = [(v[0], self.context.SCREEN_HEIGHT - v[1]) for v in vertices]
             vertices = [(v[0] - self.context.offset[0], v[1] - self.context.offset[1]) for v in vertices]
             pygame.draw.polygon(self.context.screen, (127, 255, 127, 255), vertices)
+     
+    def destroy(self):
+        self.context.world.DestroyBody(self.car)
+        for wheel in self.wheels:
+            self.context.world.DestroyBody(wheel)
+        # for spring in self.springs:
+        #     self.context.world.DestroyBody(spring)
                 
 
 
