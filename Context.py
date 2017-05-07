@@ -67,6 +67,9 @@ class Context(Box2D.b2.contactListener):
         self.terrain.update()
         self.car.update()
         self.world.Step(self.TIME_STEP, 10, 10)
+        
+        if self.car.car.position[0] < 0:
+            self.carIsDone = True
 
         if self.terrain.tiles[-1].x - self.car.car.position[0] < 30: # reached end of track
             self.terrain.add()
