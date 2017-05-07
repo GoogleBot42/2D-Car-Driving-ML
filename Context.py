@@ -71,11 +71,11 @@ class Context(Box2D.b2.contactListener):
             self.carIsDone = False
 
     def calculateScore(self):
-        distanceScore = (self.car.car.position[0] -5) / self.terrain.tiles[-1].x
-        timeScore = (pygame.time.get_ticks() - self.simStartTime)
-        if timeScore == 0:
-            return 0
-        return distanceScore**3 / timeScore * 1000000
+        distanceScore = (self.car.car.position[0] -5) #/ self.terrain.tiles[-1].x
+        #timeScore = (pygame.time.get_ticks() - self.simStartTime)
+        #if timeScore == 0:
+        #    return 0
+        return distanceScore #**3 / timeScore * 1000000
     
     def displayScore(self):
         text = self.font.render("Score: " + str(self.calculateScore()), True, (255, 255, 255, 255))
@@ -104,9 +104,10 @@ class Context(Box2D.b2.contactListener):
             self.carController.learn()
             self.carController.startNewRound()
             self.car.destroy()
-            self.terrain.destroy()
-        self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 200,
-                               TerrainGenerator.Composer(0.9, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
+            # self.terrain.destroy()
+        else:
+            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 200,
+                               TerrainGenerator.Composer(0.8, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
         self.car = Car(self, 5, 20, self.carController)
         self.distanceSinceLastCheck = self.car.car.position[0]
         self.simStartTime = pygame.time.get_ticks()

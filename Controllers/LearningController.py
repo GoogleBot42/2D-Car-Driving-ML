@@ -10,7 +10,7 @@ class LearningController(Controller):
         # constants
         self.epsilon = 1
         self.finalEpsilon = 0.01
-        self.nTrials = 10
+        self.nTrials = 1000
         self.epsilonDecay = np.exp(np.log(self.finalEpsilon)/self.nTrials)
         self.nSCGIterations = 30
         self.gamma = 0.999
@@ -50,8 +50,6 @@ class LearningController(Controller):
             actioni = np.random.randint(self.validActions.shape[0])
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
-            print(inputs.shape)
-            print(inputs)
             qs = self.qnet.use(inputs)
             actioni = np.argmax(qs)
         return self.validActions[actioni]
