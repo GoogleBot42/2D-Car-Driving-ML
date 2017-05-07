@@ -27,7 +27,7 @@ class Context(Box2D.b2.contactListener):
         self.TIME_STEP = 1.0 / self.TARGET_FPS
         self.SCREEN_WIDTH = 1200
         self.SCREEN_HEIGHT = 800
-        self.ROUNDS_TO_SKIP = 100
+        self.ROUNDS_TO_SKIP = 25
         self.roundsLeftToSkip = 0
         
         self.screenSize = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
@@ -53,9 +53,13 @@ class Context(Box2D.b2.contactListener):
         self.startNewRound()
 
         # the "car is stuck" timer
-        pygame.time.set_timer(pygame.USEREVENT, 3000) # every 3 sec check if car is stuck
+        pygame.time.set_timer(pygame.USEREVENT, 100) # every 3 sec check if car is stuck
         self.ignoreCarCheck = True # during setup and when car isn't running
         self.distanceSinceLastCheck = 0
+        self.shouldSkipNextCheck = False
+        self.eventCounter = 0
+        
+        self.lastScore = 0
 
     def update(self):
         self.ignoreCarCheck = False
@@ -69,6 +73,7 @@ class Context(Box2D.b2.contactListener):
 
         if self.carIsDone:
             self.ignoreCarCheck = True
+            self.shouldSkipNextCheck = True
             self.startNewRound(isFirst=False)
             self.carIsDone = False
 
@@ -78,6 +83,15 @@ class Context(Box2D.b2.contactListener):
         if timeScore == 0:
             return 0
         return distanceScore**3 / timeScore * 1000000
+    
+    def calculateRelativeScore(self):
+        """
+        How is the car doing since was last asked?
+        """
+        score = self.calculateScore()
+        relativeScore = score - self.lastScore
+        self.lastScore = score
+        return relativeScore
     
     def displayScore(self):
         text = self.font.render("Score: " + str(self.calculateScore()), True, (255, 255, 255, 255))
@@ -124,8 +138,17 @@ class Context(Box2D.b2.contactListener):
         self.simStartTime = pygame.time.get_ticks()
 
     def handleEvent(self, event):
+        if self.roundsLeftToSkip == 0: # if running in gui take 30 times longer to say car failed
+            self.eventCounter += 1
+            if self.eventCounter != 30:
+                return
+            else:
+                self.eventCounter = 0
         if not self.ignoreCarCheck:
-            distance = self.car.car.position[0]
-            if distance - self.distanceSinceLastCheck < 1:
-                self.carIsDone = True
-            self.distanceSinceLastCheck = distance
+            if self.shouldSkipNextCheck:
+                self.shouldSkipNextCheck = False
+            else:
+                distance = self.car.car.position[0]
+                if distance - self.distanceSinceLastCheck < 1:
+                    self.carIsDone = True
+                self.distanceSinceLastCheck = distance

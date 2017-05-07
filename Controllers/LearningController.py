@@ -35,7 +35,7 @@ class LearningController(Controller):
 
     def getNextAction(self, carPos):
         newState = self.genState(carPos)
-        newScore = self.context.calculateScore()
+        newScore = self.context.calculateRelativeScore()
         newAction = self.decideNextAction(newState)
         if self.lastState is not None:
             self.samples.append(self.lastState.tolist() + [self.lastAction, self.lastScore] + newState.tolist() + [newAction])
@@ -48,7 +48,7 @@ class LearningController(Controller):
     def decideNextAction(self, state):
         if np.random.rand(1) < self.epsilon:
             # actioni = np.random.randint(self.validActions.shape[0])
-            actioni = np.random.choice(np.array([0, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5]))
+            actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
             qs = self.qnet.use(inputs)
