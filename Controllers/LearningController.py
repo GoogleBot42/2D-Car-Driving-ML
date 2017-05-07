@@ -52,9 +52,10 @@ class LearningController(Controller):
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
             # weird error case
-            if inputs.ndim == 1:
+            if inputs.shape == (6,5):
                 actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
             else:
+                print(inputs.shape)
                 qs = self.qnet.use(inputs)
                 actioni = np.argmax(qs)
         return self.validActions[actioni]
