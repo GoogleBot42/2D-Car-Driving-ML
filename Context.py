@@ -27,6 +27,8 @@ class Context(Box2D.b2.contactListener):
         self.TIME_STEP = 1.0 / self.TARGET_FPS
         self.SCREEN_WIDTH = 1200
         self.SCREEN_HEIGHT = 800
+        self.ROUNDS_TO_SKIP = 100
+        self.roundsLeftToSkip = 0
         
         self.screenSize = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.zoom = 1.0
@@ -62,8 +64,8 @@ class Context(Box2D.b2.contactListener):
         self.car.update()
         self.world.Step(self.TIME_STEP, 10, 10)
 
-        if self.terrain.tiles[-1].x - self.car.car.position[0] < 2: # reached end of track
-            self.carIsDone = True
+        if self.terrain.tiles[-1].x - self.car.car.position[0] < 30: # reached end of track
+            self.terrain.add()
 
         if self.carIsDone:
             self.ignoreCarCheck = True
@@ -86,28 +88,37 @@ class Context(Box2D.b2.contactListener):
             self.carIsDone = True
 
     def draw(self):
-        self.screen.fill((0, 0, 0, 0))
-        self.terrain.draw()
-        self.car.draw()
+        if self.roundsLeftToSkip == 0:
+            self.screen.fill((0, 0, 0, 0))
+            self.terrain.draw()
+            self.car.draw()
         
-        self.displayScore()
+            self.displayScore()
         
-        pygame.display.flip()
-        self.clock.tick(self.TARGET_FPS)
+            pygame.display.flip()
+            # self.clock.tick(self.TARGET_FPS)
 
     def startNewRound(self, isFirst=True):
         # python random is terrible
         random.seed(datetime.now())
         if not isFirst:
             print("Car lost", self.calculateScore())
+            print("Distance", self.car.car.position[0], "Time", (pygame.time.get_ticks() - self.simStartTime))
             print("Beginning train.  This could take some time.")
             self.carController.learn()
+            print("Done")
             self.carController.startNewRound()
             self.car.destroy()
             # self.terrain.destroy()
+            if self.roundsLeftToSkip == 0:
+                self.roundsLeftToSkip = self.ROUNDS_TO_SKIP
+            else:
+                self.roundsLeftToSkip -= 1
+            print("Rounds left", self.roundsLeftToSkip)
         else:
-            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 200,
-                               TerrainGenerator.Composer(0.7, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
+            self.roundsLeftToSkip = 0
+            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300,
+                               TerrainGenerator.Composer(0.9, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
         self.car = Car(self, 5, 20, self.carController)
         self.distanceSinceLastCheck = self.car.car.position[0]
         self.simStartTime = pygame.time.get_ticks()

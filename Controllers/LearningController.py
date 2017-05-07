@@ -69,9 +69,6 @@ class LearningController(Controller):
         X = self.samples[:, :self.size]
         R = self.samples[:, self.size:self.size+1]
         nextX = self.samples[:, self.size+1:]
-        print(self.samples.shape)
-        print(nextX.shape)
-        print(nextX)
         nextQ = self.qnet.use(nextX)
 
         self.qnet.train(X, R + self.gamma * nextQ, nIterations=self.nSCGIterations)
