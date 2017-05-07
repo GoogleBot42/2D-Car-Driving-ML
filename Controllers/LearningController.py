@@ -51,8 +51,12 @@ class LearningController(Controller):
             actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
-            qs = self.qnet.use(inputs)
-            actioni = np.argmax(qs)
+            # weird error case
+            if inputs.ndim == 1:
+                actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
+            else:
+                qs = self.qnet.use(inputs)
+                actioni = np.argmax(qs)
         return self.validActions[actioni]
     
     def genState(self, carPos):
