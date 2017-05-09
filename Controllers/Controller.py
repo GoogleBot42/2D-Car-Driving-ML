@@ -14,3 +14,6 @@ class Controller:
         this function is meant to reset state that is should not be kept between rounds (or "trials")
         """
         pass
+    
+    def startingTestMode(self):
+        pass

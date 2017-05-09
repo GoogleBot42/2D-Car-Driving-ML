@@ -2,6 +2,7 @@ from Controllers.Controller import Controller
 import random
 
 class RandomController(Controller):
+    nTrials = 0
     def __init__(self, context):
         self.context = context
 

@@ -21,7 +21,7 @@ class LearningController(Controller):
         self.size = 17
         self.qnet = nn.NeuralNetwork([self.size] + self.nh + [1])  # [4, 5, 5, 1]
 
-        self.validActions = np.array([-5,0,40])
+        self.validActions = np.array([-5,0,10,40])
 
         self.samples = []
         self.lastState = None
@@ -67,8 +67,10 @@ class LearningController(Controller):
             return 0
         elif rand < 0.2:
             return 1
-        else:
+        elif rand < 0.35:
             return 2
+        else:
+            return 3
 
     def genState(self, carPos):
         car = self.context.car.car
@@ -92,3 +94,6 @@ class LearningController(Controller):
 
     def startNewRound(self):
         self.initVars()
+    
+    def startingTestMode(self):
+        self.epsilon = 0.0

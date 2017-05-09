@@ -31,6 +31,7 @@ class Context(Box2D.b2.contactListener):
         self.ROUNDS_TO_SKIP = 100
         self.roundsLeftToSkip = 0
         self.difficulty = 0.4
+        self.testRounds = 10
 
         self.screenSize = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.zoom = 1.0
@@ -44,14 +45,21 @@ class Context(Box2D.b2.contactListener):
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         Box2D.b2.contactListener.__init__(self)
         self.world = Box2D.b2.world(gravity=(0, -9.81), doSleep=True, contactListener=self)
+        
+        self.roundsTrained = 0
+        self.currentController = 0
 
         # car controllers
-        controllers = [PlayerController(self), DumbController(), StaticController(self), LearningController(self,500,[10,100,100,10],30), RandomController(self)]
-        self.carController = controllers[int(sys.argv[1])]
+        # PlayerController(self)
+        self.controllers = [LearningController(self,20,[10,100,100,10],30), LearningController(self,100,[10],30)]
+        self.testControllers = self.controllers + [DumbController(), StaticController(self), RandomController(self)]
+        self.names = ["l1","l2","dc","sc","rc"]
+        self.testScores = [0] * len(self.testControllers)
 
         self.keys = pygame.key.get_pressed()
 
         self.simStartTime = pygame.time.get_ticks()
+        self.isTesting = False
         self.startNewRound()
 
         # the "car is stuck" timer
@@ -62,6 +70,8 @@ class Context(Box2D.b2.contactListener):
         self.eventCounter = 0
 
         self.score = 0
+        
+        self.terrainController = None
 
     def update(self):
         self.ignoreCarCheck = False
@@ -70,7 +80,7 @@ class Context(Box2D.b2.contactListener):
         self.car.update()
         self.world.Step(self.TIME_STEP, 10, 10)
 
-        if self.car.car.position[0] < 0:
+        if self.car.car.position[0] < 5:
             self.score = 0
             self.carIsDone = True
 
@@ -121,13 +131,16 @@ class Context(Box2D.b2.contactListener):
             print("Score for this run", self.calculateScore())
             print("Distance", self.car.car.position[0], "Time", (pygame.time.get_ticks() - self.simStartTime))
             print("Beginning train.  This could take some time.")
-            self.carController.learn()
+            if self.isTesting:
+                self.roundsLeftToSkip = 1
+                print(self.names[self.currentController-1])
+                self.testScores[self.currentController-1] += self.calculateScore()
+            else:
+                self.carController.learn()
             print("Done")
             self.carController.startNewRound()
             self.car.destroy()
             self.terrain.destroy()
-            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300,
-                TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
             if self.roundsLeftToSkip == 0:
                 self.roundsLeftToSkip = self.ROUNDS_TO_SKIP
             else:
@@ -135,8 +148,8 @@ class Context(Box2D.b2.contactListener):
             print("Rounds left", self.roundsLeftToSkip)
         else:
             self.roundsLeftToSkip = 0
-            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300,
-                               TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
+        self.carController, self.terrainController = self.getControllers()
+        self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300, self.terrainController)
         self.car = Car(self, 6, 16, self.carController)
         self.distanceSinceLastCheck = self.car.car.position[0]
         self.simStartTime = pygame.time.get_ticks()
@@ -156,3 +169,29 @@ class Context(Box2D.b2.contactListener):
                 if distance - self.distanceSinceLastCheck < 1:
                     self.carIsDone = True
                 self.distanceSinceLastCheck = distance
+     
+    def getControllers(self):
+        if self.isTesting:
+            if self.currentController == len(self.testControllers):
+                self.terrainController = TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2))
+                self.currentController = 0
+                self.testRounds -= 1
+                if self.testRounds == 0:
+                    print("Final scores")
+                    print(self.testScores)
+                    quit()
+            controller = self.testControllers[self.currentController]
+            controller.startingTestMode()
+            self.currentController += 1
+            return controller, self.terrainController
+        else:
+            controller = self.controllers[self.currentController]
+            if self.roundsTrained >= controller.nTrials:
+                self.currentController += 1
+                self.roundsTrained = 0
+                if self.currentController == len(self.controllers):
+                    self.currentController = len(self.testControllers)
+                    self.isTesting = True
+                    return self.getControllers()
+            self.roundsTrained += 1
+            return self.controllers[self.currentController], TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2))

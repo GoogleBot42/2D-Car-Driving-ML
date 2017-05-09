@@ -4,6 +4,7 @@ from Controllers.Controller import Controller
 # does no learning.  runs in only one way
 # hand written
 class StaticController(Controller):
+    nTrials = 0
     def __init__(self, context):
         self.context = context
 
