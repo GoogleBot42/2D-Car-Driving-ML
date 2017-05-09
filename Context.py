@@ -11,6 +11,7 @@ from Controllers.PlayerController import PlayerController
 from Controllers.DumbController import DumbController
 from Controllers.StaticController import StaticController
 from Controllers.LearningController import LearningController
+from Controllers.RandomController import RandomController
 
 
 class Context(Box2D.b2.contactListener):
@@ -18,7 +19,7 @@ class Context(Box2D.b2.contactListener):
     def __init__(self):
         pygame.init()
         pygame.font.init()
-        
+
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
         # constants
@@ -27,15 +28,16 @@ class Context(Box2D.b2.contactListener):
         self.TIME_STEP = 1.0 / self.TARGET_FPS
         self.SCREEN_WIDTH = 1200
         self.SCREEN_HEIGHT = 800
-        self.ROUNDS_TO_SKIP = 25
+        self.ROUNDS_TO_SKIP = 100
         self.roundsLeftToSkip = 0
-        
+        self.difficulty = 0.4
+
         self.screenSize = (self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.zoom = 1.0
         self.offset = [0, 0]
         self.viewCenter = (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2)
         self.carIsDone = False
-        
+
         self.clock = pygame.time.Clock()
 
         # core objects
@@ -44,9 +46,9 @@ class Context(Box2D.b2.contactListener):
         self.world = Box2D.b2.world(gravity=(0, -9.81), doSleep=True, contactListener=self)
 
         # car controllers
-        controllers = [PlayerController(self), DumbController(), StaticController(self), LearningController(self)]
+        controllers = [PlayerController(self), DumbController(), StaticController(self), LearningController(self,500,[10,100,100,10],30), RandomController(self)]
         self.carController = controllers[int(sys.argv[1])]
-        
+
         self.keys = pygame.key.get_pressed()
 
         self.simStartTime = pygame.time.get_ticks()
@@ -58,8 +60,8 @@ class Context(Box2D.b2.contactListener):
         self.distanceSinceLastCheck = 0
         self.shouldSkipNextCheck = False
         self.eventCounter = 0
-        
-        self.lastScore = 0
+
+        self.score = 0
 
     def update(self):
         self.ignoreCarCheck = False
@@ -67,39 +69,36 @@ class Context(Box2D.b2.contactListener):
         self.terrain.update()
         self.car.update()
         self.world.Step(self.TIME_STEP, 10, 10)
-        
+
         if self.car.car.position[0] < 0:
+            self.score = 0
             self.carIsDone = True
 
-        if self.terrain.tiles[-1].x - self.car.car.position[0] < 30: # reached end of track
-            self.terrain.add()
+        if self.terrain.tiles[-1].x - self.car.car.position[0] < 200: # reached end of track
+            self.score = 1
+            self.carIsDone = True
 
         if self.carIsDone:
             self.ignoreCarCheck = True
             self.shouldSkipNextCheck = True
             self.startNewRound(isFirst=False)
             self.carIsDone = False
+            self.score = 0
 
     def calculateScore(self):
-        distanceScore = (self.car.car.position[0] -5) / self.terrain.tiles[-1].x
-        timeScore = (pygame.time.get_ticks() - self.simStartTime)
-        if timeScore == 0:
-            return 0
-        return distanceScore**3 / timeScore * 1000000
-    
+        distanceScore = (self.car.car.position[0] -5)
+        return self.score
+
     def calculateRelativeScore(self):
         """
         How is the car doing since was last asked?
         """
-        score = self.calculateScore()
-        relativeScore = score - self.lastScore
-        self.lastScore = score
-        return relativeScore
-    
+        return self.score
+
     def displayScore(self):
-        text = self.font.render("Score: " + str(self.calculateScore()), True, (255, 255, 255, 255))
+        text = self.font.render("Score: " + str(self.car.car.position[0] - 5), True, (255, 255, 255, 255))
         self.screen.blit(text,(0,0))
-        
+
     def BeginContact(self, contact):
         if contact.fixtureA == self.car.car.fixtures[0] or contact.fixtureB == self.car.car.fixtures[0]:
             self.carIsDone = True
@@ -109,9 +108,9 @@ class Context(Box2D.b2.contactListener):
             self.screen.fill((0, 0, 0, 0))
             self.terrain.draw()
             self.car.draw()
-        
+
             self.displayScore()
-        
+
             pygame.display.flip()
             # self.clock.tick(self.TARGET_FPS)
 
@@ -119,14 +118,16 @@ class Context(Box2D.b2.contactListener):
         # python random is terrible
         random.seed(datetime.now())
         if not isFirst:
-            print("Car lost", self.calculateScore())
+            print("Score for this run", self.calculateScore())
             print("Distance", self.car.car.position[0], "Time", (pygame.time.get_ticks() - self.simStartTime))
             print("Beginning train.  This could take some time.")
             self.carController.learn()
             print("Done")
             self.carController.startNewRound()
             self.car.destroy()
-            # self.terrain.destroy()
+            self.terrain.destroy()
+            self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300,
+                TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
             if self.roundsLeftToSkip == 0:
                 self.roundsLeftToSkip = self.ROUNDS_TO_SKIP
             else:
@@ -135,8 +136,8 @@ class Context(Box2D.b2.contactListener):
         else:
             self.roundsLeftToSkip = 0
             self.terrain = Terrain(self, 0, self.SCREEN_HEIGHT / self.PPM / 3, 1, 300,
-                               TerrainGenerator.Composer(0.9, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
-        self.car = Car(self, 5, 20, self.carController)
+                               TerrainGenerator.Composer(self.difficulty, math.pi, offset=(random.random()*math.pi, random.random()*math.pi/2)))
+        self.car = Car(self, 6, 16, self.carController)
         self.distanceSinceLastCheck = self.car.car.position[0]
         self.simStartTime = pygame.time.get_ticks()
 

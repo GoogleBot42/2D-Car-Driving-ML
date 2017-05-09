@@ -8,8 +8,8 @@ class PlayerController(Controller):
 
     def getNextAction(self, carX):
         if self.context.keys[pygame.K_RIGHT]:
-            return 50
+            return 40
         elif self.context.keys[pygame.K_LEFT]:
-            return -50
+            return -5
         else:
             return 0

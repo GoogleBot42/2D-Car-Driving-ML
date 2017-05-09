@@ -47,11 +47,22 @@ class Terrain:
         self.tiles.append(Terrain.Tile(self.context, self.x, self.y, newX, newY))
         self.x = newX
         self.y = newY
-    
+
     def getTilesAfter(self, x, length):
         index = x // self.stepSize
         index = int(index)
-        return self.tiles[index:index+length]
+        lastIndex = index + length
+        result = []
+        if index + length < len(self.tiles):
+            return self.tiles[index:index+length]
+        else:
+            while index < len(self.tiles):
+                result.append(self.tiles[index])
+                index += 1
+            while index < lastIndex:
+                result.append(Terrain.Tile(self.context,self.x,self.y,self.x,self.y))
+                index += 1
+            return result
 
     def update(self):
         pass

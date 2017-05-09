@@ -4,23 +4,24 @@ from Controllers.Controller import Controller
 
 
 class LearningController(Controller):
-    def __init__(self, context):
+    def __init__(self, context, nTrials, nh, nSCGIterations):
         self.context = context
-        
+        self.nTrials = nTrials
+        self.nh = nh
+        self.nSCGIterations = nSCGIterations
+
+
         # constants
         self.epsilon = 1
         self.finalEpsilon = 0.01
-        self.nTrials = 100
         self.epsilonDecay = np.exp(np.log(self.finalEpsilon)/self.nTrials)
-        self.nSCGIterations = 100
         self.gamma = 0.999
-        
+
         # neural network
-        self.nh = [30, 30, 30]
-        self.size = 15
+        self.size = 17
         self.qnet = nn.NeuralNetwork([self.size] + self.nh + [1])  # [4, 5, 5, 1]
 
-        self.validActions = np.array([-5, 0, 1, 5, 10, 20])
+        self.validActions = np.array([-5,0,40])
 
         self.samples = []
         self.lastState = None
@@ -47,23 +48,33 @@ class LearningController(Controller):
 
     def decideNextAction(self, state):
         if np.random.rand(1) < self.epsilon:
-            # actioni = np.random.randint(self.validActions.shape[0])
-            actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
+            #actioni = np.random.randint(self.validActions.shape[0])
+            actioni = self.pickRandom()
         else:
             inputs = np.hstack((np.tile(state, (self.validActions.shape[0], 1)), self.validActions.reshape((-1, 1))))
             # weird error case
-            if inputs.shape == (6,5):
-                actioni = np.random.choice(np.array([0, 1, 2, 3, 4, 4, 4, 4, 5, 5, 5, 5]))
+            if inputs.shape == (3,2):
+                #actioni = np.random.randint(self.validActions.shape[0])
+                actioni = self.pickRandom()
             else:
                 qs = self.qnet.use(inputs)
                 actioni = np.argmax(qs)
         return self.validActions[actioni]
-    
+
+    def pickRandom(self):
+        rand = np.random.rand(1)
+        if rand < 0.1:
+            return 0
+        elif rand < 0.2:
+            return 1
+        else:
+            return 2
+
     def genState(self, carPos):
         car = self.context.car.car
-        tiles = self.context.terrain.getTilesAfter(carPos[0], 10)
-        tiles = [t.y - carPos[0] + 3 for t in tiles]
-        return np.array([car.angle, car.angularVelocity, car.linearVelocity[0], car.linearVelocity[1]] + tiles)
+        tiles = self.context.terrain.getTilesAfter(carPos[0] - 5, 15)
+        tiles = [t.y - carPos[1] + 3 for t in tiles]
+        return np.array([car.angle]+tiles)
 
     def learn(self):
         """
